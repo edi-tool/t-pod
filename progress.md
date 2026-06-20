@@ -31,6 +31,11 @@
 ### ドキュメント整備
 - `CLAUDE.md`（プロジェクトガイド）と `progress.md`（本ファイル）を追加。
 
+### デザインのモダン化
+- カラーシステム整理: アクセント色を `brand`（indigo）として `tailwind.config` に定義。会場色を blue/emerald/amber/violet/rose に統一し、`COLOR` 辞書を `chip`/`dot`/`border` に再編。
+- 絵文字を廃止し **SVGアイコン（Lucide系）** に置換（`ICONS` + `icon()` ヘルパ）。ボトムナビ・FAB・リンク・書籍・モーダルなど全面。
+- UI刷新: グラデーションヘッダー、角丸カード＋ソフトシャドウ、タイムラインのドットレール表示、フェードイン演出（`prefers-reduced-motion` 対応）。
+
 ## 残課題 / TODO
 - [ ] **GitHub Pages の有効化**（Settings → Pages → main / root）。
 - [ ] **判読困難だった氏名・所属の確認**（画像から転記したもの）:

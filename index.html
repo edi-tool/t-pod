@@ -10,7 +10,7 @@
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#2563eb" />
+  <meta name="theme-color" content="#4f46e5" />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="apple-touch-icon" href="assets/icon.svg" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -19,37 +19,60 @@
   <!-- Tailwind CSS (Play CDN) — 要件によりCDN読込。SWでキャッシュしオフライン対応 -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    // ルームのテーマカラーで使うクラスを Tailwind に認識させる（safelist）
     tailwind.config = {
+      theme: {
+        extend: {
+          // ブランドカラー（アクセント）= indigo
+          colors: {
+            brand: {
+              50: "#eef2ff", 100: "#e0e7ff", 200: "#c7d2fe", 300: "#a5b4fc",
+              400: "#818cf8", 500: "#6366f1", 600: "#4f46e5", 700: "#4338ca", 800: "#3730a3",
+            },
+          },
+          boxShadow: {
+            card: "0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06)",
+            fab: "0 8px 24px -6px rgb(79 70 229 / 0.5)",
+          },
+        },
+      },
+      // 会場テーマカラー等は data.json から動的に組み立てるため、クラスを safelist で保持
       safelist: [
-        "bg-blue-500", "bg-blue-50", "border-blue-500", "text-blue-700", "bg-blue-100",
-        "bg-green-500", "bg-green-50", "border-green-500", "text-green-700", "bg-green-100",
-        "bg-orange-500", "bg-orange-50", "border-orange-500", "text-orange-700", "bg-orange-100",
-        "bg-purple-500", "bg-purple-50", "border-purple-500", "text-purple-700", "bg-purple-100",
-        "bg-red-500", "bg-red-50", "border-red-500", "text-red-700", "bg-red-100",
+        "bg-blue-100", "text-blue-700", "bg-blue-500", "border-blue-300",
+        "bg-emerald-100", "text-emerald-700", "bg-emerald-500", "border-emerald-300",
+        "bg-amber-100", "text-amber-700", "bg-amber-500", "border-amber-300",
+        "bg-violet-100", "text-violet-700", "bg-violet-500", "border-violet-300",
+        "bg-rose-100", "text-rose-700", "bg-rose-500", "border-rose-300",
+        "bg-slate-100", "text-slate-600", "bg-slate-300",
+        "bg-brand-500", "text-brand-700",
       ],
     };
   </script>
   <style>
     /* セーフエリア（ノッチ端末）対応 */
     .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem); }
-    /* タイムテーブルの横スクロール時にスクロールバーを控えめに */
     .scroll-x { -webkit-overflow-scrolling: touch; }
-    body { font-family: 'Hiragino Sans', 'Yu Gothic', 'Noto Sans JP', system-ui, sans-serif; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Hiragino Sans', 'Yu Gothic', 'Noto Sans JP', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    /* カードのフェードイン */
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .animate-in { animation: fadeInUp .28s ease both; }
+    @media (prefers-reduced-motion: reduce) { .animate-in { animation: none; } html { scroll-behavior: auto; } }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen">
 
   <!-- ===== Sticky ヘッダー ===== -->
-  <header class="sticky top-0 z-30 bg-blue-600 text-white shadow-md">
-    <div class="px-4 pt-3 pb-2 flex items-center justify-between">
-      <div>
-        <h1 id="eventTitle" class="text-lg font-bold leading-tight">読み込み中…</h1>
-        <p id="eventSubtitle" class="text-xs text-blue-100"></p>
-      </div>
+  <header class="sticky top-0 z-30 bg-gradient-to-br from-brand-700 via-brand-600 to-blue-600 text-white shadow-lg">
+    <div class="max-w-3xl mx-auto px-4 pt-3.5 pb-2.5">
+      <h1 id="eventTitle" class="text-lg font-bold leading-tight tracking-tight">読み込み中…</h1>
+      <p id="eventSubtitle" class="text-xs text-white/70 mt-0.5"></p>
     </div>
     <!-- 日付切替タブ（プログラム表示に連動） -->
-    <nav id="dateTabs" class="flex gap-1 px-3 pb-2 overflow-x-auto scroll-x" aria-label="開催日"></nav>
+    <nav id="dateTabs" class="max-w-3xl mx-auto flex gap-1.5 px-3 pb-2.5 overflow-x-auto scroll-x" aria-label="開催日"></nav>
   </header>
 
   <!-- ===== メインコンテンツ ===== -->
@@ -58,7 +81,7 @@
     <!-- 読み込みエラー表示 -->
     <div id="errorBox" class="hidden bg-red-50 border border-red-300 text-red-700 rounded-lg p-4 text-sm">
       <p>データの読み込みに失敗しました。通信環境をご確認のうえ、ページを再読み込みしてください。</p>
-      <a href="./" class="inline-block mt-2 text-blue-600 underline">イベント一覧へ戻る</a>
+      <a href="./" class="inline-block mt-2 text-brand-600 font-medium underline">イベント一覧へ戻る</a>
     </div>
 
     <!-- (0) イベント一覧（?id 無しのとき表示） -->
@@ -69,11 +92,11 @@
 
     <!-- (1) プログラム -->
     <section id="view-program" class="view">
-      <div id="themeBanner" class="hidden mb-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
-        <div class="text-[11px] text-blue-500 font-semibold">テーマ</div>
-        <div id="themeText" class="text-sm font-bold text-blue-800 leading-snug"></div>
+      <div id="themeBanner" class="hidden mb-4 bg-gradient-to-br from-brand-50 to-blue-50 border border-brand-100 rounded-xl p-3.5">
+        <div class="text-[11px] text-brand-500 font-bold tracking-wide uppercase">テーマ</div>
+        <div id="themeText" class="text-sm font-bold text-brand-800 leading-snug mt-0.5"></div>
       </div>
-      <div id="dayMeta" class="text-xs font-medium text-slate-500 mb-3"></div>
+      <div id="dayMeta" class="text-xs font-semibold text-slate-500 mb-3"></div>
       <div id="timetable"></div>
     </section>
 
@@ -109,22 +132,25 @@
 
   <!-- ===== FAB（お知らせ） ===== -->
   <button id="fab" aria-label="お知らせを見る"
-    class="fixed right-4 bottom-24 z-30 w-14 h-14 rounded-full bg-amber-500 text-white shadow-lg flex items-center justify-center text-2xl active:scale-95 transition">
-    🔔
-    <span id="fabBadge" class="hidden absolute -top-1 -right-1 bg-red-600 text-xs w-5 h-5 rounded-full items-center justify-center font-bold"></span>
+    class="fixed right-4 bottom-24 z-30 w-14 h-14 rounded-2xl bg-brand-600 text-white shadow-fab flex items-center justify-center active:scale-95 transition">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+    <span id="fabBadge" class="hidden absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[11px] min-w-[20px] h-5 px-1 rounded-full items-center justify-center font-bold ring-2 ring-white"></span>
   </button>
 
   <!-- ===== ボトムナビ（3タブ） ===== -->
-  <nav id="bottomNav" class="fixed bottom-0 inset-x-0 z-30 bg-white border-t border-slate-200 pb-safe">
+  <nav id="bottomNav" class="fixed bottom-0 inset-x-0 z-30 bg-white/90 backdrop-blur border-t border-slate-200/80 pb-safe">
     <div class="max-w-3xl mx-auto grid grid-cols-3">
-      <button data-tab="program" class="navbtn flex flex-col items-center py-2 text-xs gap-0.5">
-        <span class="text-xl">🗓️</span><span>プログラム</span>
+      <button data-tab="program" class="navbtn flex flex-col items-center gap-1 pt-2 pb-1 text-[11px] font-medium">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg>
+        <span>プログラム</span>
       </button>
-      <button data-tab="materials" class="navbtn flex flex-col items-center py-2 text-xs gap-0.5">
-        <span class="text-xl">📂</span><span>資料</span>
+      <button data-tab="materials" class="navbtn flex flex-col items-center gap-1 pt-2 pb-1 text-[11px] font-medium">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6" aria-hidden="true"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H21a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>
+        <span>資料</span>
       </button>
-      <button data-tab="books" class="navbtn flex flex-col items-center py-2 text-xs gap-0.5">
-        <span class="text-xl">📚</span><span>書籍</span>
+      <button data-tab="books" class="navbtn flex flex-col items-center gap-1 pt-2 pb-1 text-[11px] font-medium">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+        <span>書籍</span>
       </button>
     </div>
   </nav>
@@ -132,10 +158,12 @@
   <!-- ===== 汎用モーダル ===== -->
   <div id="modal" class="hidden fixed inset-0 z-40 flex items-end sm:items-center justify-center">
     <div id="modalBackdrop" class="absolute inset-0 bg-black/50"></div>
-    <div class="relative bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[85vh] overflow-y-auto shadow-xl">
-      <div class="sticky top-0 bg-white flex items-center justify-between px-4 py-3 border-b border-slate-100">
+    <div class="relative bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[85vh] overflow-y-auto shadow-2xl animate-in">
+      <div class="sticky top-0 bg-white/95 backdrop-blur flex items-center justify-between px-4 py-3 border-b border-slate-100">
         <h3 id="modalTitle" class="font-bold text-slate-800"></h3>
-        <button id="modalClose" aria-label="閉じる" class="text-slate-400 text-2xl leading-none px-2">×</button>
+        <button id="modalClose" aria-label="閉じる" class="text-slate-400 hover:text-slate-600 rounded-lg p-1 -mr-1 transition">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
       </div>
       <div id="modalBody" class="p-4 text-sm text-slate-700 space-y-3"></div>
     </div>
@@ -144,23 +172,40 @@
   <script>
     "use strict";
 
-    // ---- ルームカラー辞書（Tailwind purge 回避のためクラスをハードコード） ----
+    // ---- 会場テーマカラー辞書 ----
+    // data.json の rooms[].color が指すキー。クラスは <head> の safelist で保持。
+    // chip=ラベル, dot=タイムライン上の点, border=カード左罫線。
     const COLOR = {
-      blue:   { bar: "bg-blue-500",   chip: "bg-blue-100 text-blue-700",     block: "bg-blue-50 border-blue-500" },
-      green:  { bar: "bg-green-500",  chip: "bg-green-100 text-green-700",   block: "bg-green-50 border-green-500" },
-      orange: { bar: "bg-orange-500", chip: "bg-orange-100 text-orange-700", block: "bg-orange-50 border-orange-500" },
-      purple: { bar: "bg-purple-500", chip: "bg-purple-100 text-purple-700", block: "bg-purple-50 border-purple-500" },
-      red:    { bar: "bg-red-500",    chip: "bg-red-100 text-red-700",       block: "bg-red-50 border-red-500" },
+      blue:    { chip: "bg-blue-100 text-blue-700",       dot: "bg-blue-500",    border: "border-blue-300" },
+      green:   { chip: "bg-emerald-100 text-emerald-700", dot: "bg-emerald-500", border: "border-emerald-300" },
+      orange:  { chip: "bg-amber-100 text-amber-700",     dot: "bg-amber-500",   border: "border-amber-300" },
+      purple:  { chip: "bg-violet-100 text-violet-700",   dot: "bg-violet-500",  border: "border-violet-300" },
+      red:     { chip: "bg-rose-100 text-rose-700",       dot: "bg-rose-500",    border: "border-rose-300" },
     };
-    const colorOf = (key) => COLOR[key] || COLOR.blue;
+    const NEUTRAL = { chip: "bg-slate-100 text-slate-600", dot: "bg-slate-300", border: "border-slate-200" };
 
     // 会場ラベル → カラー（data.json の rooms から動的に構築。未定義はグレー扱い）
     let ROOM_COLOR = {};
-    const roomColor = (label) => COLOR[ROOM_COLOR[label]] || { chip: "bg-slate-100 text-slate-600" };
+    const roomColor = (label) => COLOR[ROOM_COLOR[label]] || NEUTRAL;
 
-    // 内容（カテゴリ）の見出し色：運営系は控えめ、授業・提案系は強調
-    const catColor = (cat) =>
-      /受付|昼食|昼休憩|閉会|事務|理事|挨拶|諸連絡/.test(cat || "") ? "text-slate-500" : "text-blue-700";
+    // 運営系カテゴリ（受付・休憩など）は控えめに、授業・提案系は強調
+    const isAdminCat = (cat) => /受付|昼食|昼休憩|休憩|閉会|事務|理事|挨拶|諸連絡/.test(cat || "");
+    const catColor = (cat) => (isAdminCat(cat) ? "text-slate-500" : "text-brand-700");
+
+    // ---- SVG アイコン（Lucide 系・stroke=currentColor） ----
+    const ICONS = {
+      calendar: '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/>',
+      mapPin: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+      file: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8M16 13H8M16 17H8"/>',
+      form: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+      book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2"/>',
+      chevron: '<path d="m9 18 6-6-6-6"/>',
+      clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+      alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/>',
+    };
+    function icon(name, cls = "w-5 h-5") {
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cls}" aria-hidden="true">${ICONS[name] || ""}</svg>`;
+    }
 
     // ---- 状態 ----
     let DATA = null;
@@ -241,15 +286,17 @@
         return;
       }
 
-      events.forEach((ev) => {
-        const card = el("a", "block bg-white border border-slate-200 rounded-lg p-4 active:bg-slate-50 transition");
+      events.forEach((ev, idx) => {
+        const card = el("a", "group relative block bg-white border border-slate-200/80 rounded-xl p-4 pl-5 shadow-card hover:border-brand-300 hover:shadow-md active:bg-slate-50 transition animate-in overflow-hidden");
         card.href = "?id=" + encodeURIComponent(ev.id);
+        card.style.animationDelay = idx * 40 + "ms";
         card.innerHTML =
-          `<div class="text-sm font-bold text-slate-800 leading-snug">${escapeHtml(ev.title || ev.id)}</div>` +
-          (ev.theme ? `<div class="text-xs text-blue-700 mt-1">テーマ：${escapeHtml(ev.theme)}</div>` : "") +
-          (ev.dateRange ? `<div class="text-xs text-slate-500 mt-2">📅 ${escapeHtml(ev.dateRange)}</div>` : "") +
-          (ev.venueName ? `<div class="text-xs text-slate-500">📍 ${escapeHtml(ev.venueName)}</div>` : "") +
-          `<div class="text-right text-blue-600 text-sm mt-1">開く ›</div>`;
+          `<span class="absolute left-0 inset-y-0 w-1.5 bg-brand-500"></span>` +
+          `<div class="text-sm font-bold text-slate-800 leading-snug pr-6">${escapeHtml(ev.title || ev.id)}</div>` +
+          (ev.theme ? `<div class="text-xs text-brand-700 mt-1">テーマ：${escapeHtml(ev.theme)}</div>` : "") +
+          (ev.dateRange ? `<div class="flex items-center gap-1.5 text-xs text-slate-500 mt-2">${icon("calendar", "w-4 h-4 text-slate-400")}<span>${escapeHtml(ev.dateRange)}</span></div>` : "") +
+          (ev.venueName ? `<div class="flex items-center gap-1.5 text-xs text-slate-500 mt-1">${icon("mapPin", "w-4 h-4 text-slate-400")}<span>${escapeHtml(ev.venueName)}</span></div>` : "") +
+          `<span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 group-hover:text-brand-400 group-hover:translate-x-0.5 transition">${icon("chevron", "w-5 h-5")}</span>`;
         wrap.appendChild(card);
       });
     }
@@ -291,10 +338,10 @@
         const isActive = d.id === activeDateId;
         const btn = el(
           "button",
-          "flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition " +
-            (isActive ? "bg-white text-blue-700" : "bg-blue-500/40 text-white"),
+          "flex-shrink-0 px-3.5 py-1.5 rounded-full text-sm font-semibold transition " +
+            (isActive ? "bg-white text-brand-700 shadow-sm" : "bg-white/15 text-white hover:bg-white/25"),
           escapeHtml(d.label) +
-            (d.date ? `<span class="ml-1 text-xs opacity-80">${escapeHtml(d.date.slice(5))}${d.weekday ? "(" + escapeHtml(d.weekday) + ")" : ""}</span>` : "")
+            (d.date ? `<span class="ml-1 text-xs font-normal opacity-80">${escapeHtml(d.date.slice(5))}${d.weekday ? "(" + escapeHtml(d.weekday) + ")" : ""}</span>` : "")
         );
         btn.onclick = () => { activeDateId = d.id; renderDateTabs(); renderTimetable(); };
         tabs.appendChild(btn);
@@ -324,30 +371,38 @@
         return;
       }
 
-      const list = el("div", "space-y-2");
-      sessions.forEach((s) => {
-        const row = el("div", "flex gap-2");
+      const list = el("div", "space-y-3");
+      sessions.forEach((s, idx) => {
+        const row = el("div", "flex gap-3 animate-in");
+        row.style.animationDelay = idx * 30 + "ms";
 
         // 時間カラム
-        const time = el("div", "flex-shrink-0 w-16 text-right pt-2.5");
+        const time = el("div", "flex-shrink-0 w-12 text-right pt-2");
         time.innerHTML =
-          `<div class="text-sm font-bold text-slate-700">${escapeHtml(s.start || "")}</div>` +
-          (s.end ? `<div class="text-[11px] text-slate-400 leading-tight">｜${escapeHtml(s.end)}</div>` : "");
+          `<div class="text-sm font-bold tabular-nums text-slate-700">${escapeHtml(s.start || "")}</div>` +
+          (s.end ? `<div class="text-[11px] tabular-nums text-slate-400 leading-tight">${escapeHtml(s.end)}</div>` : "");
         row.appendChild(time);
 
+        // タイムラインのレール（縦線＋点）
+        const roomItem = (s.items || []).find((it) => it.room);
+        const dot = roomItem ? roomColor(roomItem.room).dot : isAdminCat(s.category) ? NEUTRAL.dot : "bg-brand-500";
+        const rail = el("div", "relative flex-shrink-0 w-4 border-l-2 border-slate-200 ml-0.5");
+        rail.innerHTML = `<span class="absolute -left-[7px] top-2 w-3 h-3 rounded-full ring-4 ring-slate-50 ${dot}"></span>`;
+        row.appendChild(rail);
+
         // 内容カード
-        const card = el("div", "flex-1 min-w-0 bg-white border border-slate-200 rounded-lg p-3");
+        const card = el("div", "flex-1 min-w-0 bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-card");
         let html = `<div class="text-sm font-bold ${catColor(s.category)}">${escapeHtml(s.category || "")}</div>`;
         if (s.note) html += `<p class="text-xs text-slate-500 mt-1 leading-relaxed">${escapeHtml(s.note)}</p>`;
         (s.items || []).forEach((it) => {
-          html += `<div class="mt-2 first:mt-1">`;
+          html += `<div class="mt-2.5 first:mt-1.5">`;
           if (it.room) {
             const c = roomColor(it.room);
             html += `<span class="inline-block align-middle text-[11px] font-bold px-2 py-0.5 rounded-full mr-1.5 ${c.chip}">${escapeHtml(it.room)}</span>`;
           }
-          if (it.title) html += `<span class="align-middle text-sm font-medium text-slate-800">${escapeHtml(it.title)}</span>`;
+          if (it.title) html += `<span class="align-middle text-sm font-semibold text-slate-800">${escapeHtml(it.title)}</span>`;
           (it.meta || []).forEach((m) => {
-            html += `<div class="text-xs text-slate-600 leading-relaxed">${escapeHtml(m)}</div>`;
+            html += `<div class="text-xs text-slate-600 leading-relaxed mt-0.5">${escapeHtml(m)}</div>`;
           });
           html += `</div>`;
         });
@@ -368,29 +423,30 @@
 
       $("resourceLinks").innerHTML = "";
       (venue.resourceLinks || []).forEach((r) =>
-        $("resourceLinks").appendChild(linkCard(r, "📄"))
+        $("resourceLinks").appendChild(linkCard(r, "file"))
       );
 
       $("formLinks").innerHTML = "";
       ((DATA.eventInfo && DATA.eventInfo.forms) || []).forEach((f) =>
-        $("formLinks").appendChild(linkCard(f, "📝"))
+        $("formLinks").appendChild(linkCard(f, "form"))
       );
     }
 
-    function linkCard(item, icon) {
+    function linkCard(item, iconName) {
       const a = el(
         "a",
-        "flex items-center gap-3 bg-white border border-slate-200 rounded-lg p-3 active:bg-slate-50 transition"
+        "group flex items-center gap-3 bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-card hover:border-brand-300 hover:shadow-md active:bg-slate-50 transition"
       );
       a.href = item.url || "#";
       a.target = "_blank";
       a.rel = "noopener";
       a.innerHTML =
-        `<span class="text-xl">${icon}</span>` +
+        `<span class="flex-shrink-0 w-10 h-10 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">${icon(iconName)}</span>` +
         `<span class="flex-1 min-w-0">` +
-        `<span class="block text-sm font-medium text-slate-800">${escapeHtml(item.label)}</span>` +
-        (item.description ? `<span class="block text-xs text-slate-500">${escapeHtml(item.description)}</span>` : "") +
-        `</span><span class="text-slate-400">›</span>`;
+        `<span class="block text-sm font-semibold text-slate-800">${escapeHtml(item.label)}</span>` +
+        (item.description ? `<span class="block text-xs text-slate-500 mt-0.5">${escapeHtml(item.description)}</span>` : "") +
+        `</span>` +
+        `<span class="text-slate-300 group-hover:text-brand-400 transition">${icon("chevron", "w-5 h-5")}</span>`;
       return a;
     }
 
@@ -399,13 +455,13 @@
       const list = $("bookList");
       list.innerHTML = "";
       (DATA.books || []).forEach((b) => {
-        const card = el("a", "flex gap-3 bg-white border border-slate-200 rounded-lg p-3 active:bg-slate-50 transition");
+        const card = el("a", "flex gap-3 bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-card hover:border-brand-300 hover:shadow-md active:bg-slate-50 transition");
         card.href = b.url || "#";
         card.target = "_blank";
         card.rel = "noopener";
         const cover = b.cover
-          ? `<img src="${escapeHtml(b.cover)}" alt="" class="w-16 h-24 object-cover rounded flex-shrink-0" />`
-          : `<div class="w-16 h-24 flex-shrink-0 rounded bg-blue-100 text-blue-700 flex items-center justify-center text-2xl">📕</div>`;
+          ? `<img src="${escapeHtml(b.cover)}" alt="" class="w-16 h-24 object-cover rounded-lg flex-shrink-0 ring-1 ring-slate-200" />`
+          : `<div class="w-16 h-24 flex-shrink-0 rounded-lg bg-brand-50 text-brand-400 flex items-center justify-center">${icon("book", "w-7 h-7")}</div>`;
         card.innerHTML =
           cover +
           `<div class="min-w-0">` +
@@ -435,19 +491,21 @@
       let body = "";
       // イベント概要
       body +=
-        `<div class="bg-blue-50 border border-blue-200 rounded-lg p-3">` +
-        `<div class="text-base font-bold text-blue-800 leading-snug">${escapeHtml(info.title || "")}</div>` +
-        (info.tagline ? `<div class="text-xs text-blue-600 mt-0.5">${escapeHtml(info.tagline)}</div>` : "") +
-        (info.theme ? `<div class="text-sm text-blue-700 mt-2 font-medium">テーマ：${escapeHtml(info.theme)}</div>` : "") +
-        (info.dateRange ? `<div class="text-xs text-slate-600 mt-2">📅 ${escapeHtml(info.dateRange)}</div>` : "") +
-        (info.venueName ? `<div class="text-xs text-slate-600">📍 ${escapeHtml(info.venueName)}</div>` : "") +
+        `<div class="bg-gradient-to-br from-brand-50 to-blue-50 border border-brand-100 rounded-xl p-4">` +
+        `<div class="text-base font-bold text-brand-800 leading-snug">${escapeHtml(info.title || "")}</div>` +
+        (info.tagline ? `<div class="text-xs text-brand-600 mt-0.5">${escapeHtml(info.tagline)}</div>` : "") +
+        (info.theme ? `<div class="text-sm text-brand-700 mt-2 font-medium">テーマ：${escapeHtml(info.theme)}</div>` : "") +
+        (info.dateRange ? `<div class="flex items-center gap-1.5 text-xs text-slate-600 mt-2.5">${icon("calendar", "w-4 h-4 text-brand-500")}<span>${escapeHtml(info.dateRange)}</span></div>` : "") +
+        (info.venueName ? `<div class="flex items-center gap-1.5 text-xs text-slate-600 mt-1">${icon("mapPin", "w-4 h-4 text-brand-500")}<span>${escapeHtml(info.venueName)}</span></div>` : "") +
         `</div>`;
-      if (!notices.length) body += `<p>現在お知らせはありません。</p>`;
+      if (!notices.length) body += `<p class="text-sm text-slate-500">現在お知らせはありません。</p>`;
       notices.forEach((n) => {
         const important = n.level === "important";
         body +=
-          `<div class="rounded-lg p-3 ${important ? "bg-amber-50 border border-amber-300" : "bg-slate-50 border border-slate-200"}">` +
-          `<div class="font-semibold text-sm ${important ? "text-amber-800" : "text-slate-700"}">${important ? "❗ " : ""}${escapeHtml(n.title)}</div>` +
+          `<div class="rounded-xl p-3.5 ${important ? "bg-amber-50 border border-amber-200" : "bg-slate-50 border border-slate-200"}">` +
+          `<div class="flex items-start gap-2 font-semibold text-sm ${important ? "text-amber-800" : "text-slate-700"}">` +
+          (important ? icon("alert", "w-4 h-4 mt-0.5 flex-shrink-0") : "") +
+          `<span>${escapeHtml(n.title)}</span></div>` +
           `<div class="text-sm text-slate-600 mt-1 leading-relaxed">${escapeHtml(n.body)}</div></div>`;
       });
       openModal("概要・お知らせ", body);
@@ -469,9 +527,8 @@
       });
       document.querySelectorAll(".navbtn").forEach((b) => {
         const on = b.dataset.tab === tab;
-        b.classList.toggle("text-blue-600", on);
-        b.classList.toggle("font-bold", on);
-        b.classList.toggle("text-slate-500", !on);
+        b.classList.toggle("text-brand-600", on);
+        b.classList.toggle("text-slate-400", !on);
       });
       // 日付タブはプログラムでのみ意味を持つ（表示は常に出してOK）
       window.scrollTo({ top: 0 });
