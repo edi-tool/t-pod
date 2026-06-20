@@ -155,14 +155,70 @@
     },
     { "id": "d2-09", "dateId": "day2", "start": "16:00", "end": "", "category": "閉会行事", "items": [] }
   ],
+
   "books": [
     {
-      "title": "子どもを探究へと導く算数の「見る目」",
-      "author": "全国算数授業研究会 編",
-      "publisher": "大会テーマ書籍",
-      "cover": "",
-      "description": "大会テーマに合わせた実践書籍。会場にて特別販売します。",
-      "url": "https://www.toyokan.co.jp/search?resources%5Blimit_scope%5D=each&q=全国算数授業研究会"
+      "title": "多様な子どもが共に学ぶ 学力差に寄り添う算数授業",
+      "author": "田中 英海／編著、浦郷 淳・桑原 麻里・重松 優子・瀬尾 駿介・中澤 正浩・中村 佑／著",
+      "publisher": "東洋館出版社",
+      "cover": "https://images-na.ssl-images-amazon.com/images/P/4491063540.09.LZZZZZZZ.jpg",
+      "description": "学力差を「個性」として活かす、クラス全員に正対した授業づくり。教室のリアルな「学力差」に向き合い、具体的な手立てを提案。授業が難しい子、簡単すぎると感じる子の双方に寄り添う多角的な分析とサポートを収録。多様性を包摂し、クラス全員を「深い学び」に導く授業実践が満載の一冊です。",
+      "url": "https://www.toyokan.co.jp/products/6354",
+      "amazon_url": "https://www.amazon.co.jp/dp/4491063540"
+    },
+    {
+      "title": "割合の見方・考え方を働かせる算数授業",
+      "author": "青山 尚司／著",
+      "publisher": "東洋館出版社",
+      "cover": "https://images-na.ssl-images-amazon.com/images/P/4491063451.09.LZZZZZZZ.jpg",
+      "description": "算数の最難単元「割合」を、2つの比べ方で「使える道具」に落とし込む。算数の最大の難所「割合」を、子どもの素朴な発想から「数学的な見方・考え方」へと昇華させる指導法と実践をまとめた一冊。",
+      "url": "https://www.toyokan.co.jp/products/6345",
+      "amazon_url": "https://www.amazon.co.jp/dp/4491063451"
+    },
+    {
+      "title": "つまずきから学ぶ算数",
+      "author": "細水 保宏・夏坂 哲志・笠井 健一／編著",
+      "publisher": "東洋館出版社",
+      "cover": "https://images-na.ssl-images-amazon.com/images/P/4491064113.09.LZZZZZZZ.jpg",
+      "description": "「つまずき」こそ、学びを深めるチャンス！どの教科にも、子どもが「つまずきやすい」ポイントがあります。本シリーズでは、様々な場面でよく見られる子どものつまずきや、教師が陥りやすい指導上のつまずきなどを網羅し、子どもの学びに生かすための考え方や実践的な手立てを紹介します。",
+      "url": "https://www.toyokan.co.jp/products/6411",
+      "amazon_url": "https://www.amazon.co.jp/dp/4491064113"
+    },
+    {
+      "title": "算数 おもしろ問題で愉しい！授業づくり",
+      "author": "前田 健太／著",
+      "publisher": "東洋館出版社",
+      "cover": "https://images-na.ssl-images-amazon.com/images/P/4491063354.09.LZZZZZZZ.jpg",
+      "description": "授業でもHRでも、子どもの心が動く！おもしろ算数問題と授業づくりの秘訣！算数の授業がもっともっと愉しくなる！若手からベテランの先生まで、誰でも気軽に使えるおもしろ問題で、算数好きの子どもをどんどん増やしていきましょう！",
+      "url": "https://www.toyokan.co.jp/products/6335",
+      "amazon_url": "https://www.amazon.co.jp/dp/4491063354"
+    },
+    {
+      "title": "算数を探究的に学ぶ 日常生活を生かした算数授業づくり",
+      "author": "田中 英海／著",
+      "publisher": "東洋館出版社",
+      "cover": "https://images-na.ssl-images-amazon.com/images/P/4491057192.09.LZZZZZZZ.jpg",
+      "description": "算数が自分ごとの学びになる、日常生活を活かした授業づくり！算数の事象と、日常生活の事象を行き来する、数学的活動のサイクルで、子どもが主体的に取り組む探究的な学びが実現する！",
+      "url": "https://www.toyokan.co.jp/products/5719",
+      "amazon_url": "https://www.amazon.co.jp/dp/4491057192"
+    },
+    {
+      "title": "算数の学びを愉しむ子ども ――没頭する愉しさが探究的な学びへ導く",
+      "author": "全国算数授業研究会／編著",
+      "publisher": "東洋館出版社",
+      "cover": "https://images-na.ssl-images-amazon.com/images/P/4491059063.09.LZZZZZZZ.jpg",
+      "description": "子どもの内面から湧き出る愉しさが、探究的な算数の学びを駆動する！探究的な学びの駆動力となる、「愉しさ」のある算数授業を、実践を通じて提案します。",
+      "url": "https://www.toyokan.co.jp/products/5906",
+      "amazon_url": "https://www.amazon.co.jp/dp/4491059063"
+    },
+    {
+      "title": "はじめての算数",
+      "author": "森本 隆史／編著",
+      "publisher": "東洋館出版社",
+      "cover": "https://images-na.ssl-images-amazon.com/images/P/449105777X.09.LZZZZZZZ.jpg",
+      "description": "授業づくりの基礎・基本をぎゅっとまとめた「はじめて」シリーズ登場！どうしたら「わかりやすい」「楽しい」授業ができるだろう。不安になっている先生向けに、授業づくりの基礎・基本をぎゅっとまとめた一冊です。",
+      "url": "https://www.toyokan.co.jp/products/5777",
+      "amazon_url": "https://www.amazon.co.jp/dp/449105777X"
     }
   ]
 }
