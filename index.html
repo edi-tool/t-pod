@@ -6,10 +6,27 @@
   <!-- 静的タイトルは汎用。読み込み後に events/<id>.json の eventInfo.title で上書きされる -->
   <title>プログラム / タイムテーブル</title>
   <meta name="description" content="教育イベント・研究会向けタイムテーブル PWA" />
-  <meta name="apple-mobile-web-app-title" content="タイムテーブル" />
 
   <!-- PWA -->
-  <link rel="manifest" href="manifest.json" />
+  <!-- マニフェスト/アプリ名はパース時に ?id から確定させる（iOS はホーム画面追加の値を
+       パース時の静的タグから読むため、JS の事後差し替えでは間に合わない）。 -->
+  <script>
+    (function () {
+      var id = (new URLSearchParams(location.search).get("id") || "");
+      id = /^[A-Za-z0-9_-]+$/.test(id) ? id : "";
+      var link = document.createElement("link");
+      link.rel = "manifest";
+      link.href = id ? ("events/" + id + ".webmanifest") : "manifest.json";
+      document.head.appendChild(link);
+      // イベントモードでは汎用 apple タイトルを置かず、manifest の name（=logoSub）を使わせる。
+      if (!id) {
+        var m = document.createElement("meta");
+        m.name = "apple-mobile-web-app-title";
+        m.content = "タイムテーブル";
+        document.head.appendChild(m);
+      }
+    })();
+  </script>
   <meta name="theme-color" content="#f59e0b" />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="apple-touch-icon" href="assets/icon.svg" />
@@ -703,8 +720,15 @@
       const shortName = info.logoMain || info.title || name;
       // タイトル系（アプリ名 = logoSub）
       document.title = name;
-      const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
-      if (appleTitle) appleTitle.setAttribute("content", name);
+      // apple タイトルはイベントモードでは <head> に無い（manifest name を優先させるため）。
+      // 遅延読み取りするブラウザの保険として、無ければ生成して logoSub を入れる。
+      let appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+      if (!appleTitle) {
+        appleTitle = document.createElement("meta");
+        appleTitle.name = "apple-mobile-web-app-title";
+        document.head.appendChild(appleTitle);
+      }
+      appleTitle.setAttribute("content", name);
       // アイコン/マニフェストは logoMain がある時だけ動的生成（無ければ静的のまま）
       if (!info.logoMain) return;
       const bg = resolvedBrand();
