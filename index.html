@@ -23,16 +23,19 @@
   theme: {
     extend: {
       colors: {
+        // ブランド（テーマアクセント）色。基準色は CSS 変数 --brand（既定 amber）。
+        // events/<id>.json の eventInfo.brandColor で --brand を上書きするとイベント毎に変化。
+        // 50〜800 の濃淡は color-mix で自動生成（単色指定でOK）。
         brand: {
-          50: "#fffbeb",
-          100: "#fef3c7",
-          200: "#fde68a",
-          300: "#fcd34d",
-          400: "#fbbf24",
-          500: "#f59e0b",
-          600: "#e69500",
-          700: "#b45309",
-          800: "#92400e",
+          50: "color-mix(in srgb, var(--brand) 8%, white)",
+          100: "color-mix(in srgb, var(--brand) 16%, white)",
+          200: "color-mix(in srgb, var(--brand) 30%, white)",
+          300: "color-mix(in srgb, var(--brand) 45%, white)",
+          400: "color-mix(in srgb, var(--brand) 70%, white)",
+          500: "var(--brand)",
+          600: "color-mix(in srgb, var(--brand) 82%, black)",
+          700: "color-mix(in srgb, var(--brand) 62%, black)",
+          800: "color-mix(in srgb, var(--brand) 48%, black)",
         },
 
         // 会場カラー：彩度・明度をそろえた配色
@@ -66,7 +69,7 @@
 
       boxShadow: {
         card: "0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06)",
-        fab: "0 8px 24px -6px rgb(230 149 0 / 0.5)",
+        fab: "0 8px 24px -6px color-mix(in srgb, var(--brand) 50%, transparent)",
       },
     },
   },
@@ -86,12 +89,16 @@
 
     "bg-slate-100", "bg-slate-200", "bg-slate-300",
     "text-slate-400", "text-slate-600",
-    "bg-brand-100", "bg-brand-500", "text-brand-700",
+    "bg-brand-50", "bg-brand-100", "bg-brand-200", "bg-brand-500", "bg-brand-600",
+    "text-brand-500", "text-brand-600", "text-brand-700", "text-brand-800",
+    "border-brand-100", "border-brand-200", "border-brand-300",
     "text-white",
   ],
 };
   </script>
   <style>
+    /* ブランド基準色（既定 amber）。events/<id>.json の brandColor で実行時に上書き */
+    :root { --brand: #f59e0b; }
     /* セーフエリア（ノッチ端末）対応 */
     .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem); }
     .scroll-x { -webkit-overflow-scrolling: touch; }
@@ -136,7 +143,7 @@
     <section id="view-program" class="view">
       <!-- 日付切替タブ（タイムテーブル表示内の要素） -->
       <nav id="dateTabs" class="flex gap-1.5 mb-4 overflow-x-auto scroll-x" aria-label="開催日"></nav>
-      <div id="themeBanner" class="hidden mb-4 bg-gradient-to-br from-brand-50 to-amber-50 border border-brand-100 rounded-xl p-3.5">
+      <div id="themeBanner" class="hidden mb-4 bg-gradient-to-br from-brand-50 to-brand-100 border border-brand-100 rounded-xl p-3.5">
         <div class="text-[11px] text-brand-500 font-bold tracking-wide uppercase">テーマ</div>
         <div id="themeText" class="text-sm font-bold text-brand-800 leading-snug mt-0.5"></div>
       </div>
@@ -226,17 +233,27 @@
     // events/<id>.json の rooms[].color が指すキー。クラスは <head> の safelist で保持。
     // chip=ラベル, dot=タイムライン上の点, border=カード左罫線。
     const COLOR = {
-      blue:    { chip: "bg-blue-100 text-blue-700",       dot: "bg-blue-500",    border: "border-blue-300" },
-      green:   { chip: "bg-emerald-100 text-emerald-700", dot: "bg-emerald-500", border: "border-emerald-300" },
-      orange:  { chip: "bg-amber-100 text-amber-700",     dot: "bg-amber-500",   border: "border-amber-300" },
-      purple:  { chip: "bg-violet-100 text-violet-700",   dot: "bg-violet-500",  border: "border-violet-300" },
-      red:     { chip: "bg-rose-100 text-rose-700",       dot: "bg-rose-500",    border: "border-rose-300" },
+      blue:   { chip: "bg-venue-blue-100 text-venue-blue-700",     dot: "bg-venue-blue-500",   border: "border-venue-blue-300" },
+      green:  { chip: "bg-venue-green-100 text-venue-green-700",   dot: "bg-venue-green-500",  border: "border-venue-green-300" },
+      orange: { chip: "bg-venue-coral-100 text-venue-coral-700",   dot: "bg-venue-coral-500",  border: "border-venue-coral-300" },
+      purple: { chip: "bg-venue-violet-100 text-venue-violet-700", dot: "bg-venue-violet-500", border: "border-venue-violet-300" },
     };
     const NEUTRAL = { chip: "bg-slate-100 text-slate-600", dot: "bg-slate-300", border: "border-slate-200" };
 
     // 会場ラベル → カラー（events/<id>.json の rooms から動的に構築。未定義はグレー扱い）
     let ROOM_COLOR = {};
     const roomColor = (label) => COLOR[ROOM_COLOR[label]] || NEUTRAL;
+
+    // ---- ブランド色（イベント毎・単色指定。濃淡は color-mix で自動生成） ----
+    // 16進カラー（#rgb / #rrggbb / #rrggbbaa）のみ許可。不正値は無視して既定 amber を使用。
+    const isHexColor = (c) => typeof c === "string" && /^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(c.trim());
+    function applyBrandColor(color) {
+      if (!isHexColor(color)) return; // 既定（:root の --brand = amber）のまま
+      const c = color.trim();
+      document.documentElement.style.setProperty("--brand", c);
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute("content", c);
+    }
 
     // 運営系カテゴリ（受付・休憩など）は控えめに、授業・提案系は強調
     const isAdminCat = (cat) => /受付|昼食|昼休憩|休憩|閉会|事務|理事|挨拶|諸連絡/.test(cat || "");
@@ -361,6 +378,7 @@
 
     function renderAll() {
       const info = DATA.eventInfo || {};
+      applyBrandColor(info.brandColor);
       $("eventTitle").textContent = info.logoMain || info.title || "イベント";
       $("eventSubtitle").textContent = info.logoSub || info.subtitle || "";
       document.title = info.title || document.title;
@@ -560,7 +578,7 @@
       let body = "";
       // イベント概要
       body +=
-        `<div class="bg-gradient-to-br from-brand-50 to-amber-50 border border-brand-100 rounded-xl p-4">` +
+        `<div class="bg-brand-50 border border-brand-100 rounded-xl p-4">` +
         `<div class="text-base font-bold text-brand-800 leading-snug">${escapeHtml(info.title || "")}</div>` +
         (info.tagline ? `<div class="text-xs text-brand-600 mt-0.5">${escapeHtml(info.tagline)}</div>` : "") +
         (info.theme ? `<div class="text-sm text-brand-700 mt-2 font-medium">テーマ：${escapeHtml(info.theme)}</div>` : "") +
@@ -571,8 +589,8 @@
       notices.forEach((n) => {
         const important = n.level === "important";
         body +=
-          `<div class="rounded-xl p-3.5 ${important ? "bg-amber-50 border border-amber-200" : "bg-slate-50 border border-slate-200"}">` +
-          `<div class="flex items-start gap-2 font-semibold text-sm ${important ? "text-amber-800" : "text-slate-700"}">` +
+          `<div class="rounded-xl p-3.5 ${important ? "bg-brand-50 border border-brand-200" : "bg-slate-50 border border-slate-200"}">` +
+          `<div class="flex items-start gap-2 font-semibold text-sm ${important ? "text-brand-800" : "text-slate-700"}">` +
           (important ? icon("alert", "w-4 h-4 mt-0.5 flex-shrink-0") : "") +
           `<span>${escapeHtml(n.title)}</span></div>` +
           `<div class="text-sm text-slate-600 mt-1 leading-relaxed">${escapeHtml(n.body)}</div></div>`;

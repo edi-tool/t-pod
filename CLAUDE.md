@@ -17,7 +17,7 @@
 - **キャッシュ**: `sw.js` は **Network First**（取得成功でキャッシュ更新、失敗時はキャッシュ）。
   - シェル（HTML/JS/アセット）を変更したら **`CACHE_VERSION` を必ず上げる**。
   - 個別 `events/<id>.json` は Network First でオンデマンドにキャッシュ → 閲覧済みイベントはオフラインでも表示。
-- **スタイル**: Tailwind Play CDN。アクセント色は `tailwind.config` の `theme.extend.colors.brand`（indigo 系）。会場/ルームのテーマ色は `index.html` の `COLOR` 辞書（`chip`/`dot`/`border`、blue/emerald/amber/violet/rose）。動的生成するクラスは `tailwind.config` の `safelist` に保持（新色は両方に追加）。
+- **スタイル**: Tailwind Play CDN。アクセント色は `tailwind.config` の `theme.extend.colors.brand`。基準色は CSS 変数 `--brand`（既定 amber、`<style>` の `:root` で定義）で、`brand-50〜800` は `color-mix()` により自動生成。**イベント毎のブランド色は `events/<id>.json` の `eventInfo.brandColor`（メイン1色の16進）で指定** → `applyBrandColor()` が実行時に `--brand` を上書き（濃淡は自動）。会場/ルームのテーマ色は `index.html` の `COLOR` 辞書（`chip`/`dot`/`border`）が `tailwind.config` の `venue.*` パレット（blue/green/violet/coral）を参照。rooms の色キー `blue/green/orange/purple` を `venue-blue/green/coral/violet` にマッピング。動的生成するクラスは `tailwind.config` の `safelist` に保持（新色は両方に追加）。
 - **アイコン**: 絵文字は使わず **SVG（Lucide系）**。`ICONS` レジストリ + `icon(name, cls)` ヘルパ（`index.html`）。静的箇所（ボトムナビ・FAB・モーダル閉じる）はインラインSVG。
 - **描画の安全性**: 文字列は必ず `escapeHtml()`（`index.html`）を通して DOM に入れる。
 - **DOM 生成ヘルパ**: `el(tag, class, html)` と `$(id)`（= `getElementById`）を再利用する。
